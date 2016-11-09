@@ -29,6 +29,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 
+import pl.marczyk.rapideoscrappertv.model.File;
+
 /**
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment
  */
@@ -88,8 +90,8 @@ public class PlaybackOverlayActivity extends Activity implements
     /**
      * Implementation of OnPlayPauseClickedListener
      */
-    public void onFragmentPlayPause(Movie movie, int position, Boolean playPause) {
-        mVideoView.setVideoPath(movie.getVideoUrl());
+    public void onFragmentPlayPause(File file, int position, Boolean playPause) {
+        mVideoView.setVideoPath(file.getMainUrl());
 
         if (position == 0 || mPlaybackState == LeanbackPlaybackState.IDLE) {
             setupCallbacks();
@@ -107,7 +109,7 @@ public class PlaybackOverlayActivity extends Activity implements
             mVideoView.pause();
         }
         updatePlaybackState(position);
-        updateMetadata(movie);
+//        updateMetadata(file);
     }
 
     private void updatePlaybackState(int position) {
@@ -133,31 +135,17 @@ public class PlaybackOverlayActivity extends Activity implements
         return actions;
     }
 
-    private void updateMetadata(final Movie movie) {
+    private void updateMetadata(final File file) {
         final MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder();
 
-        String title = movie.getTitle().replace("_", " -");
+        String title = file.getName().replace("_", " -");
 
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, title);
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE,
-                movie.getDescription());
-        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI,
-                movie.getCardImageUrl());
+                file.getName());
 
         // And at minimum the title and artist for legacy support
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_TITLE, title);
-        metadataBuilder.putString(MediaMetadata.METADATA_KEY_ARTIST, movie.getStudio());
-
-        Glide.with(this)
-                .load(Uri.parse(movie.getCardImageUrl()))
-                .asBitmap()
-                .into(new SimpleTarget<Bitmap>(500, 500) {
-                    @Override
-                    public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
-                        metadataBuilder.putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap);
-                        mSession.setMetadata(metadataBuilder.build());
-                    }
-                });
     }
 
     private void loadViews() {

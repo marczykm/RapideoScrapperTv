@@ -46,6 +46,8 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import java.util.Collections;
 import java.util.List;
 
+import pl.marczyk.rapideoscrappertv.model.File;
+
 /*
  * LeanbackDetailsFragment extends DetailsFragment, a Wrapper fragment for leanback details screens.
  * It shows a detailed view of video and its meta plus related videos.
@@ -62,7 +64,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 
     private static final int NUM_COLS = 10;
 
-    private Movie mSelectedMovie;
+    private File mSelectedMovie;
 
     private ArrayObjectAdapter mAdapter;
     private ClassPresenterSelector mPresenterSelector;
@@ -78,7 +80,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 
         prepareBackgroundManager();
 
-        mSelectedMovie = (Movie) getActivity().getIntent()
+        mSelectedMovie = (File) getActivity().getIntent()
                 .getSerializableExtra(DetailsActivity.MOVIE);
         if (mSelectedMovie != null) {
             setupAdapter();
@@ -86,7 +88,6 @@ public class VideoDetailsFragment extends DetailsFragment {
             setupDetailsOverviewRowPresenter();
             setupMovieListRow();
             setupMovieListRowPresenter();
-            updateBackground(mSelectedMovie.getBackgroundImageUrl());
             setOnItemViewClickedListener(new ItemViewClickedListener());
         } else {
             Intent intent = new Intent(getActivity(), MainActivity.class);
@@ -107,20 +108,6 @@ public class VideoDetailsFragment extends DetailsFragment {
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
     }
 
-    protected void updateBackground(String uri) {
-        Glide.with(getActivity())
-                .load(uri)
-                .centerCrop()
-                .error(mDefaultBackground)
-                .into(new SimpleTarget<GlideDrawable>(mMetrics.widthPixels, mMetrics.heightPixels) {
-                    @Override
-                    public void onResourceReady(GlideDrawable resource,
-                                                GlideAnimation<? super GlideDrawable> glideAnimation) {
-                        mBackgroundManager.setDrawable(resource);
-                    }
-                });
-    }
-
     private void setupAdapter() {
         mPresenterSelector = new ClassPresenterSelector();
         mAdapter = new ArrayObjectAdapter(mPresenterSelector);
@@ -135,20 +122,6 @@ public class VideoDetailsFragment extends DetailsFragment {
                 .getApplicationContext(), DETAIL_THUMB_WIDTH);
         int height = Utils.convertDpToPixel(getActivity()
                 .getApplicationContext(), DETAIL_THUMB_HEIGHT);
-        Glide.with(getActivity())
-                .load(mSelectedMovie.getCardImageUrl())
-                .centerCrop()
-                .error(R.drawable.default_background)
-                .into(new SimpleTarget<GlideDrawable>(width, height) {
-                    @Override
-                    public void onResourceReady(GlideDrawable resource,
-                                                GlideAnimation<? super GlideDrawable>
-                                                        glideAnimation) {
-                        Log.d(TAG, "details overview card image url ready: " + resource);
-                        row.setImageDrawable(resource);
-                        mAdapter.notifyArrayItemRangeChanged(0, mAdapter.size());
-                    }
-                });
 
         row.addAction(new Action(ACTION_WATCH_TRAILER, getResources().getString(
                 R.string.watch_trailer_1), getResources().getString(R.string.watch_trailer_2)));
@@ -188,13 +161,13 @@ public class VideoDetailsFragment extends DetailsFragment {
 
     private void setupMovieListRow() {
         String subcategories[] = {getString(R.string.related_movies)};
-        List<Movie> list = MovieList.list;
+        List<File> list = FileList.list;
 
         Collections.shuffle(list);
         ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
-        for (int j = 0; j < NUM_COLS; j++) {
-            listRowAdapter.add(list.get(j % 5));
-        }
+//        for (int j = 0; j < NUM_COLS; j++) {
+            listRowAdapter.add(list.get(0));//TODO
+//        }
 
         HeaderItem header = new HeaderItem(0, subcategories[0]);
         mAdapter.add(new ListRow(header, listRowAdapter));
@@ -209,8 +182,8 @@ public class VideoDetailsFragment extends DetailsFragment {
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
-            if (item instanceof Movie) {
-                Movie movie = (Movie) item;
+            if (item instanceof File) {
+                File movie = (File) item;
                 Log.d(TAG, "Item: " + item.toString());
                 Intent intent = new Intent(getActivity(), DetailsActivity.class);
                 intent.putExtra(getResources().getString(R.string.movie), mSelectedMovie);

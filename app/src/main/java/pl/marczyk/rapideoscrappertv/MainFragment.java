@@ -51,21 +51,22 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 
+import pl.marczyk.rapideoscrappertv.model.File;
+
 public class MainFragment extends BrowseFragment {
     private static final String TAG = "MainFragment";
 
     private static final int BACKGROUND_UPDATE_DELAY = 300;
     private static final int GRID_ITEM_WIDTH = 200;
     private static final int GRID_ITEM_HEIGHT = 200;
-    private static final int NUM_ROWS = 6;
-    private static final int NUM_COLS = 15;
+    private static final int NUM_ROWS = 1;
+    private static final int NUM_COLS = 1;
 
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
     private Drawable mDefaultBackground;
     private DisplayMetrics mMetrics;
     private Timer mBackgroundTimer;
-    private URI mBackgroundURI;
     private BackgroundManager mBackgroundManager;
 
     @Override
@@ -92,32 +93,15 @@ public class MainFragment extends BrowseFragment {
     }
 
     private void loadRows() {
-        List<Movie> list = MovieList.setupMovies();
+        List<File> list = FileList.setupMovies();
 
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
         CardPresenter cardPresenter = new CardPresenter();
 
-        int i;
-        for (i = 0; i < NUM_ROWS; i++) {
-            if (i != 0) {
-                Collections.shuffle(list);
-            }
-            ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(cardPresenter);
-            for (int j = 0; j < NUM_COLS; j++) {
-                listRowAdapter.add(list.get(j % 5));
-            }
-            HeaderItem header = new HeaderItem(i, MovieList.MOVIE_CATEGORY[i]);
-            mRowsAdapter.add(new ListRow(header, listRowAdapter));
-        }
-
-        HeaderItem gridHeader = new HeaderItem(i, "PREFERENCES");
-
-        GridItemPresenter mGridPresenter = new GridItemPresenter();
-        ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
-        gridRowAdapter.add(getResources().getString(R.string.grid_view));
-        gridRowAdapter.add(getString(R.string.error_fragment));
-        gridRowAdapter.add(getResources().getString(R.string.personal_settings));
-        mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
+        ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(cardPresenter);
+        listRowAdapter.add(list.get(0));
+        HeaderItem header = new HeaderItem(0, "ALL");
+        mRowsAdapter.add(new ListRow(header, listRowAdapter));
 
         setAdapter(mRowsAdapter);
 
@@ -160,39 +144,13 @@ public class MainFragment extends BrowseFragment {
         setOnItemViewSelectedListener(new ItemViewSelectedListener());
     }
 
-    protected void updateBackground(String uri) {
-        int width = mMetrics.widthPixels;
-        int height = mMetrics.heightPixels;
-        Glide.with(getActivity())
-                .load(uri)
-                .centerCrop()
-                .error(mDefaultBackground)
-                .into(new SimpleTarget<GlideDrawable>(width, height) {
-                    @Override
-                    public void onResourceReady(GlideDrawable resource,
-                                                GlideAnimation<? super GlideDrawable>
-                                                        glideAnimation) {
-                        mBackgroundManager.setDrawable(resource);
-                    }
-                });
-        mBackgroundTimer.cancel();
-    }
-
-    private void startBackgroundTimer() {
-        if (null != mBackgroundTimer) {
-            mBackgroundTimer.cancel();
-        }
-        mBackgroundTimer = new Timer();
-        mBackgroundTimer.schedule(new UpdateBackgroundTask(), BACKGROUND_UPDATE_DELAY);
-    }
-
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
-            if (item instanceof Movie) {
-                Movie movie = (Movie) item;
+            if (item instanceof File) {
+                File movie = (File) item;
                 Log.d(TAG, "Item: " + item.toString());
                 Intent intent = new Intent(getActivity(), DetailsActivity.class);
                 intent.putExtra(DetailsActivity.MOVIE, movie);
@@ -218,27 +176,6 @@ public class MainFragment extends BrowseFragment {
         @Override
         public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
                                    RowPresenter.ViewHolder rowViewHolder, Row row) {
-            if (item instanceof Movie) {
-                mBackgroundURI = ((Movie) item).getBackgroundImageURI();
-                startBackgroundTimer();
-            }
-
-        }
-    }
-
-    private class UpdateBackgroundTask extends TimerTask {
-
-        @Override
-        public void run() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mBackgroundURI != null) {
-                        updateBackground(mBackgroundURI.toString());
-                    }
-                }
-            });
-
         }
     }
 

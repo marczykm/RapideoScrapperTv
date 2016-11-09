@@ -16,16 +16,16 @@ package pl.marczyk.rapideoscrappertv;
 
 import android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter;
 
+import pl.marczyk.rapideoscrappertv.model.File;
+
 public class DetailsDescriptionPresenter extends AbstractDetailsDescriptionPresenter {
 
     @Override
     protected void onBindDescription(ViewHolder viewHolder, Object item) {
-        Movie movie = (Movie) item;
+        File movie = (File) item;
 
         if (movie != null) {
-            viewHolder.getTitle().setText(movie.getTitle());
-            viewHolder.getSubtitle().setText(movie.getStudio());
-            viewHolder.getBody().setText(movie.getDescription());
+            viewHolder.getTitle().setText(movie.getName());
         }
     }
 }

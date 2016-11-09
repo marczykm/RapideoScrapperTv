@@ -22,6 +22,8 @@ import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 
+import pl.marczyk.rapideoscrappertv.model.File;
+
 /*
  * A CardPresenter is used to generate Views and bind Objects to them on demand.
  * It contains an Image CardView
@@ -67,20 +69,13 @@ public class CardPresenter extends Presenter {
 
     @Override
     public void onBindViewHolder(Presenter.ViewHolder viewHolder, Object item) {
-        Movie movie = (Movie) item;
+        File movie = (File) item;
         ImageCardView cardView = (ImageCardView) viewHolder.view;
 
         Log.d(TAG, "onBindViewHolder");
-        if (movie.getCardImageUrl() != null) {
-            cardView.setTitleText(movie.getTitle());
-            cardView.setContentText(movie.getStudio());
-            cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
-            Glide.with(viewHolder.view.getContext())
-                    .load(movie.getCardImageUrl())
-                    .centerCrop()
-                    .error(mDefaultCardImage)
-                    .into(cardView.getMainImageView());
-        }
+        cardView.setTitleText(movie.getName());
+//        cardView.setContentText(movie.getName());
+        cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
     }
 
     @Override
