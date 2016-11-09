@@ -15,27 +15,20 @@
 package pl.marczyk.rapideoscrappertv;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v17.leanback.app.BackgroundManager;
 import android.support.v17.leanback.app.BrowseFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.HeaderItem;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.OnItemViewClickedListener;
-import android.support.v17.leanback.widget.OnItemViewSelectedListener;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import java.util.List;
-import java.util.Timer;
 
 import pl.marczyk.rapideoscrappertv.model.File;
 
@@ -43,17 +36,11 @@ public class MainFragment extends BrowseFragment {
     private static final String TAG = "MainFragment";
 
     private ArrayObjectAdapter mRowsAdapter;
-    private Drawable mDefaultBackground;
-    private DisplayMetrics mMetrics;
-    private Timer mBackgroundTimer;
-    private BackgroundManager mBackgroundManager;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         Log.i(TAG, "onCreate");
         super.onActivityCreated(savedInstanceState);
-
-        prepareBackgroundManager();
 
         setupUIElements();
 
@@ -65,10 +52,6 @@ public class MainFragment extends BrowseFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (null != mBackgroundTimer) {
-            Log.d(TAG, "onDestroy: " + mBackgroundTimer.toString());
-            mBackgroundTimer.cancel();
-        }
     }
 
     private void loadRows() {
@@ -86,17 +69,8 @@ public class MainFragment extends BrowseFragment {
 
     }
 
-    private void prepareBackgroundManager() {
-
-        mBackgroundManager = BackgroundManager.getInstance(getActivity());
-        mBackgroundManager.attach(getActivity().getWindow());
-        mDefaultBackground = getResources().getDrawable(R.drawable.default_background);
-        mMetrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
-    }
-
     private void setupUIElements() {
-        setTitle(getString(R.string.browse_title)); // Badge, when set, takes precedent
+        setTitle(getString(R.string.browse_title));
         setHeadersState(HEADERS_ENABLED);
         setHeadersTransitionOnBackEnabled(true);
 
@@ -105,17 +79,7 @@ public class MainFragment extends BrowseFragment {
     }
 
     private void setupEventListeners() {
-        setOnSearchClickedListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(getActivity(), "Implement your own in-app search", Toast.LENGTH_LONG)
-                        .show();
-            }
-        });
-
         setOnItemViewClickedListener(new ItemViewClickedListener());
-        setOnItemViewSelectedListener(new ItemViewSelectedListener());
     }
 
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
@@ -135,12 +99,4 @@ public class MainFragment extends BrowseFragment {
                 startActivityForResult(vlcIntent, vlcRequestCode);
         }
     }
-
-    private final class ItemViewSelectedListener implements OnItemViewSelectedListener {
-        @Override
-        public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
-                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
-        }
-    }
-
 }
